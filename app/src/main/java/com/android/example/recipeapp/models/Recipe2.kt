@@ -1,6 +1,6 @@
 package com.android.example.recipeapp.models
 
-data class Recipe(
+data class Recipe2(
     var id: Int = 0,
     var name: String? = null,
     var recipe: String? = null,
