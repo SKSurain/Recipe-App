@@ -7,20 +7,21 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.android.example.recipeapp.ClickEventHandler
 import com.android.example.recipeapp.R
+import com.android.example.recipeapp.RecipeDetails
+import com.android.example.recipeapp.RedirectEventHandler
 import com.android.example.recipeapp.models.Recipe
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 
 private lateinit var view: View
-class RecipeAdapter(private val recipeList: List<Recipe>, context: Context) :
+
+class RecipeAdapter(private val recipeList: List<Recipe>) :
     RecyclerView.Adapter<RecipeAdapter.ViewHolder>() {
-    private val clickHandler: ClickEventHandler = context as ClickEventHandler
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        view = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
+        view = LayoutInflater.from(parent.context).inflate(R.layout.rv_recipe_list, parent, false)
         return ViewHolder(view)
     }
 
@@ -30,7 +31,7 @@ class RecipeAdapter(private val recipeList: List<Recipe>, context: Context) :
         holder.tvName.text = recipeList[position].name
         holder.tvRecipeType.text = recipeList[position].recipetype
 
-        val clickHandler: ClickEventHandler = view.context as ClickEventHandler
+        val redirectEventHandler: RedirectEventHandler = view.context as RedirectEventHandler
 
         val imageView = recipeList[position].image
 
@@ -41,8 +42,8 @@ class RecipeAdapter(private val recipeList: List<Recipe>, context: Context) :
 
         Glide.with(view).load(imageView).apply(options).into(holder.ivObject);
 
-        holder.itemView.setOnClickListener { v ->
-            clickHandler.forwardClick(recipeList[position])
+        holder.itemView.setOnClickListener {
+            redirectEventHandler.redirectFragment(recipeList[position], RecipeDetails())
         }
     }
 

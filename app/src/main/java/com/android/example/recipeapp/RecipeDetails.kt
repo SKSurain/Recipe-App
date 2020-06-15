@@ -1,4 +1,4 @@
-package com.android.example.recipeapp.RecipeDetails
+package com.android.example.recipeapp
 
 import android.os.Bundle
 import android.view.*
@@ -6,14 +6,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.android.example.recipeapp.R
-import com.android.example.recipeapp.RedirectEventHandler
 import com.android.example.recipeapp.models.Recipe
-import com.android.example.skbeonpropinvest.services.PropertyService
+import com.android.example.recipeapp.services.RecipeService
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.google.android.material.bottomappbar.BottomAppBar
-import com.smartherd.globofly.services.ServiceBuilder
+import com.android.example.recipeapp.services.ServiceBuilder
 import retrofit2.Call
 import retrofit2.Response
 
@@ -38,8 +35,6 @@ class RecipeDetails : Fragment() {
         }
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-
-
     }
 
     override fun onCreateView(
@@ -95,24 +90,26 @@ class RecipeDetails : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.item1 -> {
-                return redirectHandler.redirectToUpdate(recipeList)
+                redirectHandler.redirectFragment(recipeList, RecipeUpdate())
+                return true
             }
 
             R.id.item2 -> {
-                return redirectHandler.redirectToDuplicate(recipeList)
+                redirectHandler.redirectFragment(recipeList, RecipeDuplicate())
+                return true
             }
 
             R.id.item3 -> {
-                deleteRecipeList(ID)
+                deleteRecipeList()
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
     }
 
-    fun deleteRecipeList(deleteID:Int) {
-        val propertyService = ServiceBuilder.buildService(PropertyService::class.java)
-        val requestCall = propertyService.deleteRecipe(ID)
+    private fun deleteRecipeList() {
+        val recipeService = ServiceBuilder.buildService(RecipeService::class.java)
+        val requestCall = recipeService.deleteRecipe(ID)
 
         requestCall.enqueue(object : retrofit2.Callback<Unit> {
 

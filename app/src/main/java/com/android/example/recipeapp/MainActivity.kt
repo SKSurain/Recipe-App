@@ -1,37 +1,15 @@
 package com.android.example.recipeapp
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.android.example.recipeapp.RecipeDetails.RecipeDetails
-import com.android.example.recipeapp.RecipeDetails.RecipeDuplicate
-import com.android.example.recipeapp.RecipeDetails.RecipeUpdate
 import com.android.example.recipeapp.models.Recipe
-import com.android.example.skbeonpropinvest.RecipeList
 
 
-class MainActivity : AppCompatActivity(), ClickEventHandler, RedirectEventHandler {
-    override fun redirectToUpdate(recipe: Recipe): Boolean {
-        val managerUpdate = supportFragmentManager
-        val transactionUpdate = managerUpdate.beginTransaction()
-        val fragmentListUpdate = RecipeUpdate()
-        val argsUpdate = Bundle()
-        argsUpdate.putString("NameUpdate", recipe.name)
-        argsUpdate.putString("RecipeTypeUpdate", recipe.recipetype)
-        argsUpdate.putString("ImageUpdate", recipe.image)
-        argsUpdate.putString("IngredientUpdate", recipe.ingredients)
-        argsUpdate.putString("RecipeUpdate", recipe.recipe)
-        argsUpdate.putInt("IdUpdate", recipe.id)
-        fragmentListUpdate.arguments = argsUpdate
-
-        transactionUpdate.replace(R.id.fragment, fragmentListUpdate)
-        transactionUpdate.addToBackStack(null)
-        transactionUpdate.commit()
-        return true
-    }
+class MainActivity : AppCompatActivity(), RedirectEventHandler {
 
     override fun redirectToRecipeList() {
         val manager = supportFragmentManager
@@ -42,29 +20,9 @@ class MainActivity : AppCompatActivity(), ClickEventHandler, RedirectEventHandle
         transaction.commit()
     }
 
-    override fun redirectToDuplicate(recipe: Recipe): Boolean {
-        val managerUpdate = supportFragmentManager
-        val transactionUpdate = managerUpdate.beginTransaction()
-        val fragmentListUpdate = RecipeDuplicate()
-        val argsUpdate = Bundle()
-        argsUpdate.putString("NameUpdate", recipe.name)
-        argsUpdate.putString("RecipeTypeUpdate", recipe.recipetype)
-        argsUpdate.putString("ImageUpdate", recipe.image)
-        argsUpdate.putString("IngredientUpdate", recipe.ingredients)
-        argsUpdate.putString("RecipeUpdate", recipe.recipe)
-        argsUpdate.putInt("IdUpdate", recipe.id)
-        fragmentListUpdate.arguments = argsUpdate
-
-        transactionUpdate.replace(R.id.fragment, fragmentListUpdate)
-        transactionUpdate.addToBackStack(null)
-        transactionUpdate.commit()
-        return true
-    }
-
-    override fun forwardClick(recipe: Recipe) {
+    override fun redirectFragment(recipe: Recipe, fragment: Fragment){
         val manager = supportFragmentManager
         val transaction = manager.beginTransaction()
-        val fragmentList = RecipeDetails()
         val args = Bundle()
         args.putString("Name", recipe.name)
         args.putString("RecipeType", recipe.recipetype)
@@ -72,9 +30,9 @@ class MainActivity : AppCompatActivity(), ClickEventHandler, RedirectEventHandle
         args.putString("Ingredient", recipe.ingredients)
         args.putString("Recipe", recipe.recipe)
         args.putInt("Id", recipe.id)
-        fragmentList.arguments = args
+        fragment.arguments = args
 
-        transaction.replace(R.id.fragment, fragmentList)
+        transaction.replace(R.id.fragment, fragment)
         transaction.addToBackStack(null)
         transaction.commit()
     }
@@ -82,7 +40,6 @@ class MainActivity : AppCompatActivity(), ClickEventHandler, RedirectEventHandle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
 
         val manager = supportFragmentManager
         val transaction = manager.beginTransaction()
@@ -104,7 +61,6 @@ class MainActivity : AppCompatActivity(), ClickEventHandler, RedirectEventHandle
         val fm: FragmentManager = supportFragmentManager
         var backStackCount = fm.getBackStackEntryCount()
         if (backStackCount > 1) {
-            Log.i("MainActivity", "popping backstack")
             fm.popBackStack()
         } else {
             finish()

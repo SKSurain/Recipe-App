@@ -1,9 +1,9 @@
 package com.android.example.recipeapp
 
+import androidx.fragment.app.Fragment
 import com.android.example.recipeapp.models.Recipe
 
 interface RedirectEventHandler {
-    fun redirectToUpdate(recipe: Recipe): Boolean
     fun redirectToRecipeList()
-    fun redirectToDuplicate(recipe: Recipe): Boolean
+    fun redirectFragment(recipe: Recipe, fragment: Fragment)
 }

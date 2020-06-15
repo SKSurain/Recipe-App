@@ -1,8 +1,6 @@
-package com.android.example.skbeonpropinvest
+package com.android.example.recipeapp
 
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -14,12 +12,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.example.recipeapp.R
-import com.android.example.recipeapp.data.SampleData
 import com.android.example.recipeapp.helper.RecipeAdapter
 import com.android.example.recipeapp.models.Recipe
-import com.android.example.skbeonpropinvest.services.PropertyService
-import com.smartherd.globofly.services.ServiceBuilder
+import com.android.example.recipeapp.services.RecipeService
+import com.android.example.recipeapp.services.ServiceBuilder
 import retrofit2.Call
 import retrofit2.Response
 
@@ -41,7 +37,7 @@ class RecipeList : Fragment() {
         //Recyclerview initialize and load sample data
         val rvRecipeList = view.findViewById(R.id.recycler_view) as? RecyclerView
 
-        var testingProperty = loadPropertyList(rvRecipeList, view)
+        loadRecipeList(rvRecipeList, view)
 
         return view
     }
@@ -53,11 +49,10 @@ class RecipeList : Fragment() {
         super.onPrepareOptionsMenu(menu)
     }
 
-    fun loadPropertyList(recyclerView: RecyclerView?,view: View) {
+    fun loadRecipeList(recyclerView: RecyclerView?, view: View) {
         val filter = HashMap<String, String>()
-        val propertyService = ServiceBuilder.buildService(PropertyService::class.java)
-        val requestCall = propertyService.getRecipeList(filter)
-        val myView = view
+        val recipeService = ServiceBuilder.buildService(RecipeService::class.java)
+        val requestCall = recipeService.getRecipeList(filter)
 
         requestCall.enqueue(object : retrofit2.Callback<List<Recipe>> {
 
@@ -69,15 +64,19 @@ class RecipeList : Fragment() {
             ) {
                 if (response.isSuccessful) {
                     // Your status code is in the range of 200's
-                    val destinationList = response.body()!!
-                    recyclerView?.adapter = RecipeAdapter(destinationList, view.context)
+                    val retrofitRecipeList = response.body()!!
+                    recyclerView?.adapter = RecipeAdapter(retrofitRecipeList)
                     recyclerView?.layoutManager = LinearLayoutManager(view.context)
 
 //                    Spinner initialize and set adapter
-                    val spinnerRecipeType = view!!.findViewById(R.id.spinnerRecipeType) as? Spinner
+                    val spinnerRecipeType = view.findViewById(R.id.spinnerRecipeType) as? Spinner
                     val recipeTypeList = arrayOf("Breakfast", "Dessert", "Dinner", "Lunch", "All")
                     val arrayAdapter =
-                        ArrayAdapter(view.context, android.R.layout.simple_spinner_item, recipeTypeList)
+                        ArrayAdapter(
+                            view.context,
+                            android.R.layout.simple_spinner_item,
+                            recipeTypeList
+                        )
                     spinnerRecipeType!!.adapter = arrayAdapter
 
 //                     Set default value for spinner
@@ -94,7 +93,7 @@ class RecipeList : Fragment() {
                                 var resetRecylerView: Boolean = false
                                 val resultList = ArrayList<Recipe>()
 
-                                for (recipes in destinationList) {
+                                for (recipes in retrofitRecipeList) {
                                     if (position == 4) {
                                         resetRecylerView = true
                                         break
@@ -104,13 +103,12 @@ class RecipeList : Fragment() {
                                 }
                                 if (resultList.size > 0 && view != null) {
                                     recyclerView?.adapter =
-                                        RecipeAdapter(resultList, view!!.context)
+                                        RecipeAdapter(resultList)
                                 } else if (resetRecylerView) {
-                                    if (destinationList != null && view != null) {
+                                    if (retrofitRecipeList != null && view != null) {
                                         recyclerView?.adapter =
-                                            RecipeAdapter(destinationList, view!!.context)
+                                            RecipeAdapter(retrofitRecipeList)
                                     }
-                                    resetRecylerView = false
                                 }
                             }
 
@@ -119,17 +117,14 @@ class RecipeList : Fragment() {
                             }
                         }
 
-
-//                    recyclerView?.adapter = DestinationAdapter(destinationList)
-
                 } else if (response.code() == 401) {
                     Toast.makeText(
-                        view?.context,
+                        view.context,
                         "Your session has expired. Please Login again.", Toast.LENGTH_LONG
                     ).show()
                 } else { // Application-level failure
 //                     Your status code is in the range of 300's, 400's and 500's
-                    Toast.makeText(view?.context, "Failed to retrieve items", Toast.LENGTH_LONG)
+                    Toast.makeText(view.context, "Failed to retrieve items", Toast.LENGTH_LONG)
                         .show()
                 }
             }
@@ -138,7 +133,7 @@ class RecipeList : Fragment() {
 //             or Error Creating Http Request or Error Processing Http Response
             override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
 
-                Toast.makeText(view?.context, "Error Occurred" + t.toString(), Toast.LENGTH_LONG)
+                Toast.makeText(view.context, "Error Occurred" + t.toString(), Toast.LENGTH_LONG)
                     .show()
             }
         })

@@ -1,4 +1,4 @@
-package com.smartherd.globofly.services
+package com.android.example.recipeapp.services
 
 import android.os.Build
 import okhttp3.Interceptor

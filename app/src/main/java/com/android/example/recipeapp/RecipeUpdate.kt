@@ -1,4 +1,4 @@
-package com.android.example.recipeapp.RecipeDetails
+package com.android.example.recipeapp
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,17 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import com.android.example.recipeapp.R
-import com.android.example.recipeapp.RedirectEventHandler
 import com.android.example.recipeapp.models.Recipe
-import com.android.example.skbeonpropinvest.services.PropertyService
+import com.android.example.recipeapp.services.RecipeService
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.smartherd.globofly.services.ServiceBuilder
+import com.android.example.recipeapp.services.ServiceBuilder
 import retrofit2.Call
 import retrofit2.Response
 
-private lateinit var recipeList: List<Recipe>
 private var name: String = ""
 private var ingredient: String = ""
 private var recipeType: String = ""
@@ -25,15 +22,16 @@ private var recipe: String = ""
 private var image: String = ""
 private var ID: Int = 0
 private lateinit var redirectHandler: RedirectEventHandler
-class RecipeUpdate : Fragment(){
+
+class RecipeUpdate : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         if (arguments != null) {
-            name = arguments!!.get("NameUpdate").toString()
-            ingredient = arguments!!.get("IngredientUpdate").toString()
-            recipeType = arguments!!.get("RecipeTypeUpdate").toString()
-            recipe = arguments!!.get("RecipeUpdate").toString()
-            image = arguments!!.get("ImageUpdate").toString()
-            ID = arguments!!.get("IdUpdate") as Int
+            name = arguments!!.get("Name").toString()
+            ingredient = arguments!!.get("Ingredient").toString()
+            recipeType = arguments!!.get("RecipeType").toString()
+            recipe = arguments!!.get("Recipe").toString()
+            image = arguments!!.get("Image").toString()
+            ID = arguments!!.get("Id") as Int
         }
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -45,7 +43,7 @@ class RecipeUpdate : Fragment(){
     ): View? {
 
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.activity_destiny_detail, container, false)
+        val view = inflater.inflate(R.layout.recipe_update, container, false)
 
         redirectHandler = view.context as RedirectEventHandler
         val etName: TextView = view.findViewById(R.id.etName)
@@ -68,14 +66,18 @@ class RecipeUpdate : Fragment(){
         var etRecipe: TextView = view.findViewById(R.id.etRecipe)
         etRecipe.text = recipe
 
-        val btnDelete : Button = view.findViewById(R.id.btn_delete)
+        val btnDelete: Button = view.findViewById(R.id.btn_delete)
         btnDelete.setOnClickListener {
-            deleteRecipeList(ID)
+            deleteRecipeList()
         }
 
-        val btnUpdate : Button = view.findViewById(R.id.btn_update)
+        val btnUpdate: Button = view.findViewById(R.id.btn_update)
         btnUpdate.setOnClickListener {
-            updateRecipeList(etName.text.toString(),etIngredient.text.toString(),etRecipe.text.toString())
+            updateRecipeList(
+                etName.text.toString(),
+                etIngredient.text.toString(),
+                etRecipe.text.toString()
+            )
         }
 
         return view
@@ -89,9 +91,9 @@ class RecipeUpdate : Fragment(){
         super.onPrepareOptionsMenu(menu)
     }
 
-    fun deleteRecipeList(deleteID:Int) {
-        val propertyService = ServiceBuilder.buildService(PropertyService::class.java)
-        val requestCall = propertyService.deleteRecipe(ID)
+    private fun deleteRecipeList() {
+        val recipeService = ServiceBuilder.buildService(RecipeService::class.java)
+        val requestCall = recipeService.deleteRecipe(ID)
 
         requestCall.enqueue(object : retrofit2.Callback<Unit> {
 
@@ -119,10 +121,10 @@ class RecipeUpdate : Fragment(){
         })
     }
 
-    fun updateRecipeList(updatedName:String, updatedIngredients:String, updatedRecipe:String) {
-        val propertyService = ServiceBuilder.buildService(PropertyService::class.java)
-        val requestCall = propertyService.updateRecipe(ID, updatedName, updatedIngredients,updatedRecipe)
-        var destinationList: Recipe = Recipe()
+    fun updateRecipeList(updatedName: String, updatedIngredients: String, updatedRecipe: String) {
+        val recipeService = ServiceBuilder.buildService(RecipeService::class.java)
+        val requestCall =
+            recipeService.updateRecipe(ID, updatedName, updatedIngredients, updatedRecipe)
 
         requestCall.enqueue(object : retrofit2.Callback<Recipe> {
 
@@ -134,7 +136,6 @@ class RecipeUpdate : Fragment(){
             ) {
                 if (response.isSuccessful) {
                     // Your status code is in the range of 200's
-                    val destinationList = response.body()!!
                     Toast.makeText(view?.context, "Recipe Updated", Toast.LENGTH_LONG)
                         .show()
                     redirectHandler.redirectToRecipeList()
